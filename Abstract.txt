@@ -1,0 +1,68 @@
+The Blinky project is a simple program for the LPC2378
+using Keil 'MCB2300' Evaluation Board and demonstrating 
+interrupt functionality.
+
+Example functionality:                                                   
+ - Clock Settings:
+   - XTAL             = 12   MHz
+   - PLL              = 288  MHz
+   - processor clock  = 48   MHz
+   - USB clock        = 48   MHz
+   - peripheral clock = 12   MHz
+ - UART1 settings
+   (baudrate = 9600, 8 data bits, 1 stop bits, no parity)
+ - Timer0 timer is activating clock_1s every 1 second, 
+   starting AD conversion (every 1 ms) and displaying 
+   bargraph on 8 LEDs, it works in interrupt mode
+ - AD conversion is done in interrupt mode
+ - AD value is sent every 1 second on UART1
+ - text is displayed to textual LCD
+ - bargraph is displayed to textual LCD, according to 
+   potentiometer position
+ - 8 LEDs state represent the potentiometer position
+ 
+The Blinky program is available in different targets:
+  Simulator:       configured for software Simulator
+  MCB2300 Flash:   runs from Internal Flash located on chip
+                   (used for production or target debugging)
+
+
+
+
+
+
+//Initialize
+//last_cap = 0
+//cur_cap = 0
+//last_obj_cnt = 0
+//obj_cnt = 0
+
+
+//Setup timer 0 to be capture with 1ms 
+//Capture interrupt ->
+    //-Take current capture value(cur_cap)
+    //-Increment object counter(obj_cnt)
+    //-Store value between last obj and this as val = cur_cap - last_cap
+    //--------EDGE CASE: If obj_cnt = 0, => first object here, av is this only
+    //-new av = val
+    /---------ELSE
+    //-Calculate new av = ((old_av*(obj_cnt-1)) + val)/obj_cnt   <---This is new average time between objects in ms
+    
+    //Edge Case: If obj_cnt exceeds 32 bits?
+    //Edge Case: Counter resets itself(Check for greater than)?
+    //Alarm Cond. 1 = If theres no object and counter resets
+    //Alarm Cond. 2 = Objects coming in waaayy too fast(faster than 4 times*clk_freq I think)
+    
+
+
+//Setup timer 1 to be match with 1 second
+//Match Interrupt ->
+    //-Take val = obj_cnt - last_obj_cnt
+    //Increment sec_cnt
+	//-Store current obj_cnt in last_obj_cnt
+    //--------EDGE CASE: If sec_cnt = 0, => first second here, av is this only
+    //-new av = val
+    /---------ELSE
+    //-Calculate new av = ((old_av*(sec_cnt-1)) + val)/sec_cnt   <---This is new average of objects per second 
+    
+    //Edge Case: If sec_cnt exceeds 32 bits?
